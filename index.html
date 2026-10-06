@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="Demo technologiczne 3D w przeglądarce: bujanie na sieci nad współczesną Warszawą, zbudowaną z OpenStreetMap i modeli 3D GUGiK." />
+  <meta property="og:title" content="Warszawa na sieci" />
+  <meta property="og:description" content="Demo technologiczne 3D w przeglądarce: Warszawa z otwartych danych, ruch uliczny, pora dnia. Całość zbudował Claude Code – pokaz możliwości obecnych modeli AI i tempa ich rozwoju." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lukasbialozor.github.io/warszawa-na-sieci-demo/" />
+  <meta property="og:image" content="https://lukasbialozor.github.io/warszawa-na-sieci-demo/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#1b1f24" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231b1f24'/%3E%3Cg fill='none' stroke='%23e33' stroke-width='1.6'%3E%3Cpath d='M16 3v26M3 16h26M6.8 6.8l18.4 18.4M25.2 6.8 6.8 25.2'/%3E%3Ccircle cx='16' cy='16' r='5'/%3E%3Ccircle cx='16' cy='16' r='10'/%3E%3C/g%3E%3C/svg%3E" />
+  <title>Warszawa na sieci</title>
+  <style>
+    /* Jeden, ciemny motyw (nakladka na scene 3D). Kolory jako tokeny; uklad: pelny ekran, HUD przy krawedziach. */
+    :root {
+      color-scheme: dark;
+      --bg: #1b1f24;
+      --fg: #fff;
+      --accent: #e33;
+      --accent-on: #e33c;
+      --panel: #000a;
+      --panel-strong: #000c;
+      --veil: #0009;
+      --line: #fff6;
+      --shadow: #000a;
+      --font: system-ui, 'Segoe UI', Roboto, sans-serif;
+    }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); font: 16px/1.4 var(--font);
+      -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+    canvas { display: block; position: fixed; left: 0; top: 0; touch-action: none; }
+    button { font-family: var(--font); color: var(--fg); cursor: pointer; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    #hud { position: fixed; inset: 0; pointer-events: none; }
+    #stats { position: absolute; left: 18px; top: 14px; font-size: 15px; line-height: 1.5; text-shadow: 0 1px 3px var(--shadow); font-variant-numeric: tabular-nums; }
+    #stats b { font-size: 22px; }
+    .dim { opacity: .7; font-size: 13px; }
+    #crosshair { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 3px var(--shadow); opacity: .8; }
+    #toast { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); padding: 8px 16px; border-radius: 6px; background: var(--panel); font-size: 15px; opacity: 0; transition: opacity .2s; }
+    #toast.show { opacity: 1; }
+    #banner { position: absolute; left: 0; right: 0; top: 13%; text-align: center; opacity: 0; transform: translateY(-8px); transition: opacity .6s, transform .6s; text-shadow: 0 2px 10px var(--shadow); }
+    #banner.show { opacity: 1; transform: none; }
+    #banner .t { font-size: 38px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; text-wrap: balance; }
+    #banner .s { margin-top: 4px; font-size: 16px; letter-spacing: .08em; opacity: .85; }
+    #banner .t::after { content: ''; display: block; width: 90px; height: 2px; margin: 8px auto 0; background: var(--accent); }
+    #tower { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); padding: 6px 14px; border-left: 3px solid var(--accent); background: var(--panel); font-size: 16px; letter-spacing: .04em; white-space: nowrap; opacity: 0; transition: opacity .4s; }
+    #tower.show { opacity: 1; }
+    #help { position: absolute; right: 16px; bottom: 16px; padding: 12px 16px; border-radius: 8px; background: var(--panel); font-size: 13px; line-height: 1.7; }
+    #help.hidden { display: none; }
+    kbd { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 3px; background: #fff2; text-align: center; font-family: inherit; }
+    #rotate { display: none; position: fixed; left: 50%; top: 22%; transform: translateX(-50%); padding: 6px 12px; border-radius: 6px; background: var(--panel); font-size: 13px; pointer-events: none; }
+
+    #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 0 16px; background: var(--veil); cursor: pointer; }
+    #overlay h1 { margin: 0; font-size: 40px; letter-spacing: .02em; text-wrap: balance; }
+    #overlay p { margin: 0; opacity: .8; }
+    #overlay.hidden { display: none; }
+    #overlay .lead { max-width: 560px; text-align: center; opacity: .75; font-size: 15px; text-wrap: balance; }
+    #overlay .touch-help { display: none; max-width: 520px; text-align: center; font-size: 14px; opacity: .8; }
+    #credits { position: absolute; bottom: 18px; left: 18px; max-width: min(46%, 520px); display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 12px; opacity: .75; }
+    #credits a { color: var(--fg); }
+    #repo { font-size: 14px; opacity: 1; margin-bottom: 4px; }
+    #repo:not([href]) { display: none; }
+
+    /* sterowanie dotykowe */
+    #touch { display: none; }
+    body.touch #touch { display: block; }
+    body.touch:has(#overlay:not(.hidden)) #touch { display: none; }
+    body.touch #help { display: none; }
+    body.touch #overlay .touch-help { display: block; }
+    body.touch #banner { top: 17%; }
+    body.touch #tower { top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+    body.touch #stats { font-size: 13px; top: calc(10px + env(safe-area-inset-top, 0px)); left: calc(14px + env(safe-area-inset-left, 0px)); }
+    body.touch #stats b { font-size: 18px; }
+    body.touch #crosshair { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; box-shadow: 0 0 0 2px #0007; }
+    #t-layer { position: fixed; inset: 0; touch-action: none; }
+    #stick { position: fixed; left: calc(86px + env(safe-area-inset-left, 0px)); top: calc(100% - 96px - env(safe-area-inset-bottom, 0px)); width: 112px; height: 112px;
+      margin: -56px 0 0 -56px; border-radius: 50%; border: 2px solid var(--line); background: #0003; pointer-events: none; opacity: .5; transition: opacity .2s; }
+    #stick.on { opacity: 1; transition: none; }
+    #stick.sprint { border-color: var(--accent); }
+    #knob { position: absolute; left: 50%; top: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; background: #fffa; box-shadow: 0 1px 6px var(--shadow); }
+    .tb { position: fixed; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--line); background: #0006;
+      font-size: 11px; font-weight: 700; letter-spacing: .04em; touch-action: none; padding: 0; }
+    .tb.on { background: var(--accent-on); border-color: var(--fg); }
+    #t-web { right: calc(26px + env(safe-area-inset-right, 0px)); bottom: calc(28px + env(safe-area-inset-bottom, 0px)); width: 96px; height: 96px; font-size: 14px; }
+    #t-jump { right: calc(136px + env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: 72px; height: 72px; }
+    #t-zip { right: calc(36px + env(safe-area-inset-right, 0px)); bottom: calc(138px + env(safe-area-inset-bottom, 0px)); width: 74px; height: 74px; font-size: 10px; }
+    .tb { flex-direction: column; line-height: 1.1; }
+    .tb small { font-size: 8px; font-weight: 500; opacity: .75; letter-spacing: 0; }
+    #t-hint { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100% - 32px)); max-height: calc(100% - 32px);
+      overflow-y: auto; padding: 14px 16px; border-radius: 12px; background: var(--panel-strong); font-size: 13px; line-height: 1.45; }
+    #t-hint p { margin: 0 0 8px; }
+    #t-hint.hidden { display: none; }
+    #t-hint button { margin-top: 4px; width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--accent-on); font-size: 14px; font-weight: 600; padding: 10px; }
+    #t-top { position: fixed; top: calc(10px + env(safe-area-inset-top, 0px)); right: calc(10px + env(safe-area-inset-right, 0px)); display: flex; gap: 8px; }
+    #t-top button, #t-places button { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: 13px; font-weight: 600; padding: 10px 12px; }
+    #t-places { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding: 14px; border-radius: 12px; background: var(--panel-strong); max-width: calc(100% - 32px); }
+    #t-places.hidden { display: none; }
+
+    @media (max-width: 760px), (max-height: 480px) {
+      #banner { top: 9%; }
+      #banner .t { font-size: 24px; }
+      #banner .s { font-size: 13px; }
+      #tower { font-size: 13px; bottom: auto; top: 20%; }
+      #overlay h1 { font-size: 30px; }
+      #overlay .lead { font-size: 13px; }
+      #credits { position: static; max-width: 100%; margin-top: 6px; font-size: 11px; align-items: center; text-align: center; }
+    }
+    @media (orientation: portrait) {
+      body.touch #rotate { display: block; }
+      body.touch #tower { bottom: auto; top: calc(70px + env(safe-area-inset-top, 0px)); }
+      #t-top { flex-direction: column; align-items: stretch; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #banner, #toast, #tower, #stick { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <div id="stats"></div>
+    <div id="crosshair"></div>
+    <div id="toast"></div>
+    <div id="banner"></div>
+    <div id="tower"></div>
+    <div id="help">
+      <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ruch &nbsp; <kbd>Shift</kbd> sprint / bieg po ścianie<br>
+      <kbd>Spacja</kbd> skok (w trakcie bujania: wybicie)<br>
+      <kbd>LPM</kbd> / <kbd>F</kbd> trzymaj = bujanie na sieci<br>
+      <kbd>PPM</kbd> / <kbd>E</kbd> przyciągnij się do celownika<br>
+      <kbd>C</kbd> nurkowanie &nbsp; <kbd>R</kbd> reset<br>
+      <kbd>1</kbd>–<kbd>8</kbd> teleport: PKiN, Rondo ONZ, Varso, Rondo Daszyńskiego,<br>Spire, Pl. Zamkowy, Most Świętokrzyski, Stadion<br>
+      <kbd>T</kbd> czas +3 h &nbsp; <kbd>Q</kbd> jakość &nbsp; <kbd>H</kbd> ukryj pomoc
+    </div>
+    <div id="rotate">Obróć telefon poziomo</div>
+  </div>
+  <div id="touch">
+    <div id="t-layer"></div>
+    <div id="stick"><div id="knob"></div></div>
+    <button class="tb" id="t-web" data-key="Mouse0" data-look>SIEĆ<small>trzymaj</small></button>
+    <button class="tb" id="t-jump" data-key="Space">SKOK</button>
+    <button class="tb" id="t-zip" data-key="Mouse2">DO KROPKI<small>przyciągnij</small></button>
+    <div id="t-top">
+      <button id="t-help" aria-label="Sterowanie">?</button>
+      <button id="t-map">Miejsca</button>
+      <button id="t-time">+3 h</button>
+      <button id="t-pause">Pauza</button>
+    </div>
+    <div id="t-places" class="hidden"></div>
+    <div id="t-hint" class="hidden">
+      <p><b>Lewy kciuk</b> – ruch. Wychyl do końca: sprint i bieg po ścianie.</p>
+      <p><b>Prawy kciuk</b> – przeciągnij, żeby się rozejrzeć. W biegu kamera sama obraca się za tobą.</p>
+      <p><b>SIEĆ</b> – trzymaj, żeby się bujać, puść, żeby polecieć. Przeciągając po niej, celujesz.</p>
+      <p><b>DO KROPKI</b> – przyciąga do miejsca pod kropką na środku ekranu (np. krawędź dachu).</p>
+      <p><b>SKOK</b> – skok, wybicie z liny, odbicie od ściany. Na ścianie: kciuk do przodu = wspinaczka.</p>
+      <button id="t-hint-ok">Rozumiem</button>
+    </div>
+  </div>
+  <div id="overlay">
+    <h1>Warszawa</h1>
+    <p class="lead">Bujanie na sieci nad współczesną Warszawą — miasto z OpenStreetMap i modeli 3D GUGiK</p>
+    <p id="status">Ładowanie...</p>
+    <noscript><p>Strona wymaga włączonego JavaScriptu i przeglądarki z WebGL2.</p></noscript>
+    <p class="touch-help">Lewy kciuk: ruch (wychylenie do końca = sprint) · przeciąganie po prawej: rozglądanie ·
+      SIEĆ trzymaj = bujanie · DO KROPKI = przyciągnięcie do kropki na środku ekranu</p>
+    <div id="credits">
+      <a id="repo" target="_blank" rel="noopener">Kod źródłowy i opis powstania (GitHub)</a>
+      <span>Dane: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">współtwórcy OpenStreetMap</a> (ODbL)
+        · budynki 3D LOD2: <a href="https://www.geoportal.gov.pl" target="_blank" rel="noopener">GUGiK</a>
+        · silnik: three.js</span>
+      <span>Demo technologiczne zbudowane w całości przez Claude Code – pokaz możliwości obecnych modeli AI i tempa ich rozwoju. Projekt fanowski, niezwiązany z Marvel ani Sony.</span>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

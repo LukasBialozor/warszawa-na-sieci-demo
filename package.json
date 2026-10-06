@@ -1,0 +1,34 @@
+{
+  "name": "warszawa-na-sieci",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Bujanie na sieci nad współczesną Warszawą – demo technologiczne w przeglądarce (three.js) z miastem z OpenStreetMap i modeli 3D GUGiK, zbudowane z Claude Code",
+  "license": "MIT",
+  "author": "Lukas Bialozor",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukasBialozor/warszawa-na-sieci-demo.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "fetch-osm": "node tools/fetch-osm.mjs",
+    "build-city": "node tools/build-city.mjs && node tools/build-lod2.mjs",
+    "build-landmarks": "node tools/build-landmarks.mjs",
+    "build:artifact": "node tools/build-artifact.mjs",
+    "deploy:pages": "node tools/deploy-pages.mjs"
+  },
+  "dependencies": {
+    "three": "^0.186.1",
+    "three-mesh-bvh": "^0.9.15"
+  },
+  "devDependencies": {
+    "proj4": "^2.22.0",
+    "vite": "^8.3.1"
+  }
+}

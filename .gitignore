@@ -1,0 +1,20 @@
+node_modules/
+dist/
+dist-artifact/
+# surowe dane (OSM ~100 MB, paczka LOD2 GUGiK 116 MB) - pobierane skryptami, patrz README
+data/raw/
+# tekstury generowane przez skrypty Blendera (wbudowane w pliki .glb)
+data/landmarks/tex/
+__pycache__/
+*.blend1
+.DS_Store
+Thumbs.db
+# lokalne ustawienia i logi
+.env
+.env.*
+*.log
+.vscode/
+.idea/
+.claude/settings.local.json
+# materialy promocyjne (wideo, GIF, zrzuty) - generowane, duze
+promo/
