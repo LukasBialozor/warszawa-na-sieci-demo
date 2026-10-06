@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="Demo technologiczne 3D w przeglądarce: bujanie na sieci nad współczesną Warszawą, zbudowaną z OpenStreetMap i modeli 3D GUGiK." />
+  <meta property="og:title" content="Warszawa na sieci" />
+  <meta property="og:description" content="Demo technologiczne 3D w przeglądarce: Warszawa z otwartych danych, ruch uliczny, pora dnia. Całość zbudował Claude Code – pokaz możliwości obecnych modeli AI i tempa ich rozwoju." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lukasbialozor.github.io/warszawa-na-sieci-demo/" />
+  <meta property="og:image" content="https://lukasbialozor.github.io/warszawa-na-sieci-demo/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#1b1f24" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231b1f24'/%3E%3Cg fill='none' stroke='%23e33' stroke-width='1.6'%3E%3Cpath d='M16 3v26M3 16h26M6.8 6.8l18.4 18.4M25.2 6.8 6.8 25.2'/%3E%3Ccircle cx='16' cy='16' r='5'/%3E%3Ccircle cx='16' cy='16' r='10'/%3E%3C/g%3E%3C/svg%3E" />
+  <title>Warszawa na sieci</title>
+  <style>:root{--lightningcss-light: ;--lightningcss-dark:initial;color-scheme:dark;--bg:#1b1f24;--fg:#fff;--accent:#e33;--accent-on:#e33c;--panel:#000a;--panel-strong:#000c;--veil:#0009;--line:#fff6;--shadow:#000a;--font:system-ui, "Segoe UI", Roboto, sans-serif}html,body{background:var(--bg);height:100%;color:var(--fg);font:16px/1.4 var(--font);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;margin:0;overflow:hidden}canvas{touch-action:none;display:block;position:fixed;top:0;left:0}button{font-family:var(--font);color:var(--fg);cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#hud{pointer-events:none;position:fixed;inset:0}#stats{text-shadow:0 1px 3px var(--shadow);font-variant-numeric:tabular-nums;font-size:15px;line-height:1.5;position:absolute;top:14px;left:18px}#stats b{font-size:22px}.dim{opacity:.7;font-size:13px}#crosshair{background:var(--fg);width:6px;height:6px;box-shadow:0 0 3px var(--shadow);opacity:.8;border-radius:50%;margin:-3px 0 0 -3px;position:absolute;top:50%;left:50%}#toast{background:var(--panel);opacity:0;border-radius:6px;padding:8px 16px;font-size:15px;transition:opacity .2s;position:absolute;top:22%;left:50%;transform:translate(-50%)}#toast.show{opacity:1}#banner{text-align:center;opacity:0;text-shadow:0 2px 10px var(--shadow);transition:opacity .6s,transform .6s;position:absolute;top:13%;left:0;right:0;transform:translateY(-8px)}#banner.show{opacity:1;transform:none}#banner .t{letter-spacing:.14em;text-transform:uppercase;text-wrap:balance;font-size:38px;font-weight:700}#banner .s{letter-spacing:.08em;opacity:.85;margin-top:4px;font-size:16px}#banner .t:after{content:"";background:var(--accent);width:90px;height:2px;margin:8px auto 0;display:block}#tower{border-left:3px solid var(--accent);background:var(--panel);letter-spacing:.04em;white-space:nowrap;opacity:0;padding:6px 14px;font-size:16px;transition:opacity .4s;position:absolute;bottom:7%;left:50%;transform:translate(-50%)}#tower.show{opacity:1}#help{background:var(--panel);border-radius:8px;padding:12px 16px;font-size:13px;line-height:1.7;position:absolute;bottom:16px;right:16px}#help.hidden{display:none}kbd{text-align:center;background:#fff2;border-radius:3px;min-width:18px;padding:0 5px;font-family:inherit;display:inline-block}#rotate{background:var(--panel);pointer-events:none;border-radius:6px;padding:6px 12px;font-size:13px;display:none;position:fixed;top:22%;left:50%;transform:translate(-50%)}#overlay{background:var(--veil);cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:12px;padding:0 16px;display:flex;position:fixed;inset:0}#overlay h1{letter-spacing:.02em;text-wrap:balance;margin:0;font-size:40px}#overlay p{opacity:.8;margin:0}#overlay.hidden{display:none}#overlay .lead{text-align:center;opacity:.75;text-wrap:balance;max-width:560px;font-size:15px}#overlay .touch-help{text-align:center;opacity:.8;max-width:520px;font-size:14px;display:none}#credits{opacity:.75;flex-direction:column;align-items:flex-start;gap:4px;max-width:min(46%,520px);font-size:12px;display:flex;position:absolute;bottom:18px;left:18px}#credits a{color:var(--fg)}#repo{opacity:1;margin-bottom:4px;font-size:14px}#repo:not([href]),#touch{display:none}body.touch #touch{display:block}body.touch:has(#overlay:not(.hidden)) #touch{display:none}body.touch #help{display:none}body.touch #overlay .touch-help{display:block}body.touch #banner{top:17%}body.touch #tower{top:auto;bottom:calc(12px + env(safe-area-inset-bottom,0px))}body.touch #stats{top:calc(10px + env(safe-area-inset-top,0px));left:calc(14px + env(safe-area-inset-left,0px));font-size:13px}body.touch #stats b{font-size:18px}body.touch #crosshair{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;box-shadow:0 0 0 2px #0007}#t-layer{touch-action:none;position:fixed;inset:0}#stick{left:calc(86px + env(safe-area-inset-left,0px));top:calc(100% - 96px - env(safe-area-inset-bottom,0px));border:2px solid var(--line);pointer-events:none;opacity:.5;background:#0003;border-radius:50%;width:112px;height:112px;margin:-56px 0 0 -56px;transition:opacity .2s;position:fixed}#stick.on{opacity:1;transition:none}#stick.sprint{border-color:var(--accent)}#knob{width:50px;height:50px;box-shadow:0 1px 6px var(--shadow);background:#fffa;border-radius:50%;margin:-25px 0 0 -25px;position:absolute;top:50%;left:50%}.tb{border:2px solid var(--line);letter-spacing:.04em;touch-action:none;background:#0006;border-radius:50%;justify-content:center;align-items:center;padding:0;font-size:11px;font-weight:700;display:flex;position:fixed}.tb.on{background:var(--accent-on);border-color:var(--fg)}#t-web{right:calc(26px + env(safe-area-inset-right,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));width:96px;height:96px;font-size:14px}#t-jump{right:calc(136px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:72px;height:72px}#t-zip{right:calc(36px + env(safe-area-inset-right,0px));bottom:calc(138px + env(safe-area-inset-bottom,0px));width:74px;height:74px;font-size:10px}.tb{flex-direction:column;line-height:1.1}.tb small{opacity:.75;letter-spacing:0;font-size:8px;font-weight:500}#t-hint{background:var(--panel-strong);border-radius:12px;width:min(460px,100% - 32px);max-height:calc(100% - 32px);padding:14px 16px;font-size:13px;line-height:1.45;position:fixed;top:50%;left:50%;overflow-y:auto;transform:translate(-50%,-50%)}#t-hint p{margin:0 0 8px}#t-hint.hidden{display:none}#t-hint button{border:1px solid var(--line);background:var(--accent-on);border-radius:8px;width:100%;margin-top:4px;padding:10px;font-size:14px;font-weight:600}#t-top{top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));gap:8px;display:flex;position:fixed}#t-top button,#t-places button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:10px 12px;font-size:13px;font-weight:600}#t-places{background:var(--panel-strong);border-radius:12px;grid-template-columns:1fr 1fr;gap:8px;max-width:calc(100% - 32px);padding:14px;display:grid;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%)}#t-places.hidden{display:none}@media (max-width:760px),(max-height:480px){#banner{top:9%}#banner .t{font-size:24px}#banner .s{font-size:13px}#tower{font-size:13px;top:20%;bottom:auto}#overlay h1{font-size:30px}#overlay .lead{font-size:13px}#credits{text-align:center;align-items:center;max-width:100%;margin-top:6px;font-size:11px;position:static}}@media (orientation:portrait){body.touch #rotate{display:block}body.touch #tower{bottom:auto;top:calc(70px + env(safe-area-inset-top,0px))}#t-top{flex-direction:column;align-items:stretch}}@media (prefers-reduced-motion:reduce){#banner,#toast,#tower,#stick{transition:none}}</style>
+  <script type="module" crossorigin src="./assets/index-Bt78RLy8.js"></script>
+</head>
+<body>
+  <div id="hud">
+    <div id="stats"></div>
+    <div id="crosshair"></div>
+    <div id="toast"></div>
+    <div id="banner"></div>
+    <div id="tower"></div>
+    <div id="help">
+      <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ruch &nbsp; <kbd>Shift</kbd> sprint / bieg po ścianie<br>
+      <kbd>Spacja</kbd> skok (w trakcie bujania: wybicie)<br>
+      <kbd>LPM</kbd> / <kbd>F</kbd> trzymaj = bujanie na sieci<br>
+      <kbd>PPM</kbd> / <kbd>E</kbd> przyciągnij się do celownika<br>
+      <kbd>C</kbd> nurkowanie &nbsp; <kbd>R</kbd> reset<br>
+      <kbd>1</kbd>–<kbd>8</kbd> teleport: PKiN, Rondo ONZ, Varso, Rondo Daszyńskiego,<br>Spire, Pl. Zamkowy, Most Świętokrzyski, Stadion<br>
+      <kbd>T</kbd> czas +3 h &nbsp; <kbd>Q</kbd> jakość &nbsp; <kbd>H</kbd> ukryj pomoc
+    </div>
+    <div id="rotate">Obróć telefon poziomo</div>
+  </div>
+  <div id="touch">
+    <div id="t-layer"></div>
+    <div id="stick"><div id="knob"></div></div>
+    <button class="tb" id="t-web" data-key="Mouse0" data-look>SIEĆ<small>trzymaj</small></button>
+    <button class="tb" id="t-jump" data-key="Space">SKOK</button>
+    <button class="tb" id="t-zip" data-key="Mouse2">DO KROPKI<small>przyciągnij</small></button>
+    <div id="t-top">
+      <button id="t-help" aria-label="Sterowanie">?</button>
+      <button id="t-map">Miejsca</button>
+      <button id="t-time">+3 h</button>
+      <button id="t-pause">Pauza</button>
+    </div>
+    <div id="t-places" class="hidden"></div>
+    <div id="t-hint" class="hidden">
+      <p><b>Lewy kciuk</b> – ruch. Wychyl do końca: sprint i bieg po ścianie.</p>
+      <p><b>Prawy kciuk</b> – przeciągnij, żeby się rozejrzeć. W biegu kamera sama obraca się za tobą.</p>
+      <p><b>SIEĆ</b> – trzymaj, żeby się bujać, puść, żeby polecieć. Przeciągając po niej, celujesz.</p>
+      <p><b>DO KROPKI</b> – przyciąga do miejsca pod kropką na środku ekranu (np. krawędź dachu).</p>
+      <p><b>SKOK</b> – skok, wybicie z liny, odbicie od ściany. Na ścianie: kciuk do przodu = wspinaczka.</p>
+      <button id="t-hint-ok">Rozumiem</button>
+    </div>
+  </div>
+  <div id="overlay">
+    <h1>Warszawa</h1>
+    <p class="lead">Bujanie na sieci nad współczesną Warszawą — miasto z OpenStreetMap i modeli 3D GUGiK</p>
+    <p id="status">Ładowanie...</p>
+    <noscript><p>Strona wymaga włączonego JavaScriptu i przeglądarki z WebGL2.</p></noscript>
+    <p class="touch-help">Lewy kciuk: ruch (wychylenie do końca = sprint) · przeciąganie po prawej: rozglądanie ·
+      SIEĆ trzymaj = bujanie · DO KROPKI = przyciągnięcie do kropki na środku ekranu</p>
+    <div id="credits">
+      <a id="repo" target="_blank" rel="noopener">Kod źródłowy i opis powstania (GitHub)</a>
+      <span>Dane: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">współtwórcy OpenStreetMap</a> (ODbL)
+        · budynki 3D LOD2: <a href="https://www.geoportal.gov.pl" target="_blank" rel="noopener">GUGiK</a>
+        · silnik: three.js</span>
+      <span>Demo technologiczne zbudowane w całości przez Claude Code – pokaz możliwości obecnych modeli AI i tempa ich rozwoju. Projekt fanowski, niezwiązany z Marvel ani Sony.</span>
+    </div>
+  </div>
+</body>
+</html>
